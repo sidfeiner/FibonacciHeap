@@ -20,7 +20,6 @@ public class FibonacciHeap {
     public static int totalLinks;
     public static int totalCuts;
     private int numMarked;
-    private int check;
 
     /**
      * Links 2 nodes.
