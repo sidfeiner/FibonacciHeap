@@ -20,6 +20,7 @@ public class FibonacciHeap {
     public static int totalLinks;
     public static int totalCuts;
     private int numMarked;
+    private int numOfTrees;
 
     /**
      * Links 2 nodes.
@@ -45,6 +46,8 @@ public class FibonacciHeap {
         n1.setChild(n2);
         n2.setParent(n1);
         n1.setRank(n1.getRank() + 1);
+        totalLinks++;
+        numOfTrees = numOfTrees - 1;
         return n1;
     }
 
@@ -132,18 +135,29 @@ public class FibonacciHeap {
         }//heap is not empty
         else {
             //insert new node at beginning of heap
-            HeapNode oldFirst = first;
-            first = newNode;
-            first.next = oldFirst;
-            first.prev = last;
-            oldFirst.prev = first;
-            last.next = first;
-            if (key < minNode.getKey()) { //check if new key will be new minimum
-                minNode = first;
-            }
+            swapFirst(newNode);
         }
         size++;
         return first;
+    }
+
+    /*insert a non new node to beginning*/
+    private void insertNodeAtStart(HeapNode node) {
+        swapFirst(node);
+    }
+
+    /*makes node the new first of the heap, pushes old first ahead of it*/
+    private void swapFirst(HeapNode node) {
+        HeapNode oldFirst = first;
+        first = node;
+        first.next = oldFirst;
+        first.prev = last;
+        oldFirst.prev = first;
+        last.next = first;
+        if (node.getKey() < minNode.getKey()) { //check if new key will be new minimum
+            minNode = first;
+        }
+        numOfTrees++;
     }
 
     /**
@@ -177,6 +191,7 @@ public class FibonacciHeap {
         //if heap1 is empty
         if (this.isEmpty()) {
             heap1EmptyMeld(heap2);
+            return;
         }
         //if heap2 is empty do nothing
         if (heap2.isEmpty()) {
@@ -187,6 +202,10 @@ public class FibonacciHeap {
         heap2.first.prev = this.last;
         heap2.last.next = first;
         first.prev = heap2.last;
+        /*update size,numOftrees,numOfMarked*/
+        size += heap2.size;
+        numOfTrees += heap2.numOfTrees;
+        numMarked += heap2.numMarked;
         //updateMin
         if (this.minNode.getKey() > heap2.minNode.getKey()) {
             minNode = heap2.minNode;
@@ -200,6 +219,7 @@ public class FibonacciHeap {
         minNode = heap2.minNode;
         size = heap2.size;
         numMarked = heap2.numMarked;
+        numOfTrees = heap2.numOfTrees;
     }
 
 
@@ -258,24 +278,50 @@ public class FibonacciHeap {
      * to reflect this change (for example, the cascading cuts procedure should be applied if needed).
      */
     public void decreaseKey(HeapNode x, int delta) {
-        return; // should be replaced by student code
-    }
-
-    private HeapNode cut(HeapNode node, HeapNode first) {
-        if (node.getNext() == node) {
-            // orphan
-            node.setNext(null);
-            node.setPrev(null);
-            return null;
-        } else {
-            node.getNext().setPrev(node.getPrev());
-            node.getPrev().setNext(node.getNext());
-            HeapNode res = node.getNext();
-            node.setNext(null);
-            node.setPrev(null);
-            return first == node ? res : first;
+        x.setKey(x.getKey() - delta);
+        /*if x is not a root check if we need to cut*/
+        if (x.getParent() != null) {
+            /*if the decrease cause a heap violation*/
+            if (x.getParent().getKey() > x.getKey()) {
+                cascadingCut(x, x.getParent());
+            }
         }
     }
+
+    private void cascadingCut(HeapNode node, HeapNode parent) {
+        /*while parent is not the root*/
+        while (parent.getParent() != null) {
+            HeapNode curParent = parent;
+            cut(node, parent);
+            insertNodeAtStart(node);
+            /*parent is not marked, cut and break form cuts*/
+            if (parent.isMarked == false) {
+                parent.mark();
+                break;
+            } else { /*keep cutting, node is now old parent, parent is old parents parent*/
+                node = curParent;
+                parent = node.getParent();
+            }
+        }
+    }
+
+
+    private void cut(HeapNode node, HeapNode parent) {
+        node.parent = null;
+        node.unmark();
+        parent.setRank(parent.getRank() - 1);
+        if (node.getNext() == node) {
+            parent.child = null;
+        } else {
+            parent.child = node.next;
+            node.prev.next = node.next;
+            node.next.prev = node.prev;
+
+        }
+        totalCuts++;
+
+    }
+
 
     /**
      * public int potential()
@@ -285,7 +331,7 @@ public class FibonacciHeap {
      * The potential equals to the number of trees in the heap plus twice the number of marked nodes in the heap.
      */
     public int potential() {
-        return this.size + 2 * this.numMarked; // should be replaced by student code
+        return this.numOfTrees + 2 * this.numMarked; // should be replaced by student code
     }
 
     /**
@@ -321,6 +367,10 @@ public class FibonacciHeap {
         return arr; // should be replaced by student code
     }
 
+    public int getNumberOfTrees() {
+        return numOfTrees;
+    }
+
     /**
      * public class HeapNode
      * <p>
@@ -341,6 +391,7 @@ public class FibonacciHeap {
         public HeapNode(int key) {
             this.key = key;
         }
+
 
         public int getKey() {
             return this.key;
