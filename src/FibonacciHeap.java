@@ -202,6 +202,7 @@ public class FibonacciHeap {
         heap2.first.prev = this.last;
         heap2.last.next = first;
         first.prev = heap2.last;
+        this.last = heap2.last;
         /*update size,numOftrees,numOfMarked*/
         size += heap2.size;
         numOfTrees += heap2.numOfTrees;
@@ -367,9 +368,56 @@ public class FibonacciHeap {
         return arr; // should be replaced by student code
     }
 
+
     public int getNumberOfTrees() {
         return numOfTrees;
     }
+
+    public String printTree(HeapNode root) {
+        StringBuilder s = new StringBuilder();
+        s.append(", "+root.getKey());
+        s.append("\n");
+        HeapNode curr=root.getChild();
+
+        while(curr!=null) {
+            s.append(printLinkedList(curr));
+            s.append("\n");
+            curr = curr.getChild();
+        }
+        return s.toString();
+    }
+
+    public String printLinkedList(HeapNode n) {
+        HeapNode p = n;
+        StringBuilder s = new StringBuilder();
+        int startKey = p.getKey();
+        do {
+            s.append(", "+p.getKey());
+            p = p.getNext();
+        }
+        while(p!=null && p.getKey()!=startKey);
+        return s.toString();
+    }
+
+    public void printHeap(){
+        HeapNode curr = first;
+        int startKey = curr.getKey();
+        do {
+            System.out.println(printTree(curr));
+            System.out.println("_________________________________");
+            curr = curr.getNext();
+        }
+        while(curr!=null && curr.getKey()!=startKey);
+    }
+
+    public HeapNode getFirst() {
+        return first;
+    }
+
+    public void setSize(int i) {
+        this.size = i;
+    }
+
 
     /**
      * public class HeapNode
