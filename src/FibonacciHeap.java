@@ -141,6 +141,7 @@ public class FibonacciHeap {
             newNode.next = newNode;
             newNode.prev = newNode;
             minNode = newNode;
+            numOfTrees=1;
         }//heap is not empty
         else {
             //insert new node at beginning of heap
