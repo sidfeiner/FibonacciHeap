@@ -18,6 +18,7 @@ public class FibonacciHeap {
     private int numMarked;
     private int numOfTrees;
 
+
     /**
      * Links 2 nodes.
      * n1's root will be the root of the link's result
@@ -386,8 +387,22 @@ public class FibonacciHeap {
      * The function should run in O(k(logk + deg(H)).
      */
     public static int[] kMin(FibonacciHeap H, int k) {
-        int[] arr = new int[42];
-        return arr; // should be replaced by student code
+        int[] arr = new int[k];
+        FibonacciHeap helperHeap = new FibonacciHeap();
+        helperHeap.insert(k);
+        helperHeap.first.setPointerToOriginalTree(H.findMin());
+        for (int i=0;i<k;i++){
+            HeapNode currentMin = helperHeap.findMin();
+            arr[i] = currentMin.getKey();
+            HeapNode child = currentMin.pointerToOriginalTree.getChild();
+            helperHeap.deleteMin();
+            for(int j=0;j<currentMin.getRank();j++){
+                helperHeap.insert(child.getKey());
+                helperHeap.first.setPointerToOriginalTree(child);
+                child = child.getNext();
+            }
+        }
+        return arr;
     }
 
 
@@ -457,10 +472,12 @@ public class FibonacciHeap {
         private HeapNode next;
         private HeapNode prev;
         private HeapNode parent;
+        private HeapNode pointerToOriginalTree; //only used for kMin
 
         public HeapNode(int key) {
             this.key = key;
         }
+
 
 
         public int getKey() {
@@ -521,6 +538,10 @@ public class FibonacciHeap {
 
         public void unmark() {
             this.isMarked = false;
+        }
+
+        public void setPointerToOriginalTree(HeapNode pointerToOriginalTree) {
+            this.pointerToOriginalTree = pointerToOriginalTree;
         }
     }
 }
