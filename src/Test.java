@@ -1,5 +1,6 @@
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -8,8 +9,21 @@ public class Test {
 
     public static Logger logger = Logger.getLogger("Test");
 
-    public static FibonacciHeap createHeap(int size) {
-        List<Integer> l = IntStream.rangeClosed(1, size).boxed().collect(Collectors.toList());
+
+    public static FibonacciHeap testMeld() {
+        Random rand = new Random();
+
+        FibonacciHeap heap1= createHeap(1,3);
+
+        FibonacciHeap heap2= createHeap(4,6);
+
+        heap1.meld(heap2);
+
+
+        return heap1;
+    }
+    public static FibonacciHeap createHeap(int from,int to) {
+        List<Integer> l = IntStream.rangeClosed(from, to).boxed().collect(Collectors.toList());
         Collections.shuffle(l);
         FibonacciHeap heap = new FibonacciHeap();
         for (Integer n : l) {
@@ -17,7 +31,6 @@ public class Test {
             heap.insert(n);
         }
 
-        heap.consolidate();
         return heap;
 
     }
@@ -74,8 +87,10 @@ public class Test {
     }
 
     public static void main(String[] args) {
-        FibonacciHeap heap = createHeap(10);
-        testFibHeap(heap);
-        System.out.println("a");
+//        FibonacciHeap heap = createHeap(10);
+//        testFibHeap(heap);
+//        System.out.println("a");
+       FibonacciHeap heap1 = testMeld();
+       heap1.printHeap();
     }
 }
