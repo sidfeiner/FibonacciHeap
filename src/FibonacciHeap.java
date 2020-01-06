@@ -1,8 +1,4 @@
-import sun.net.www.HeaderParser;
-
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * FibonacciHeap
@@ -78,32 +74,45 @@ public class FibonacciHeap {
     }
 
     /**
-     * returns minimum root
+     * returns array with first root, last root, minimum root and amount of trees we have
      */
-    private HeapNode fromBuckets(HeapNode[] cells) {
-        HeapNode n = null;
-        for (int i = 0; i < cells.length; i++) {
-            if (cells[i] != null) {
-                if (n == null) {
-                    n = cells[i];
-                    n.setNext(n);
-                    n.setPrev(n);
+    private HeapNode[] fromBuckets(HeapNode[] cells) {
+        HeapNode minNode = null;
+        HeapNode lastNode = null;
+        HeapNode firstNode = null;
+        int treesAmount = 0;
+        for (HeapNode cell : cells) {
+            if (cell != null) {
+                lastNode = cell;
+                treesAmount++;
+                if (firstNode == null) firstNode = lastNode;
+                if (minNode == null) {
+                    minNode = lastNode;
+                    minNode.setNext(minNode);
+                    minNode.setPrev(minNode);
                 } else {
-                    insertAfter(n, cells[i]);
-                    if (cells[i].getKey() < n.getKey()) {
-                        n = cells[i];
+                    insertAfter(minNode, lastNode);
+                    if (lastNode.getKey() < minNode.getKey()) {
+                        minNode = lastNode;
                     }
                 }
             }
         }
-        return n;
+        // treesAmount encapsualted by HeapNode just to avoid creating a new class
+        // for this function's result
+        HeapNode[] result = {firstNode, lastNode, minNode, new HeapNode(treesAmount)};
+        return result;
     }
 
-    public void consolidate() {
+    public int consolidate() {
         int cellsAmount = (int) Math.ceil(Math.log(size()) / Math.log(GOLDEN));
         HeapNode[] cells = new HeapNode[cellsAmount];
         toBuckets(cells);
-        this.minNode = fromBuckets(cells);
+        HeapNode[] res = fromBuckets(cells);
+        this.first = res[0];
+        this.last = res[1];
+        this.minNode = res[2];
+        return res[3].getKey();
     }
 
     /**
@@ -166,10 +175,22 @@ public class FibonacciHeap {
      * Delete the node containing the minimum key.
      */
     public void deleteMin() {
-        HeapNode child = this.minNode.getChild();
-        child.setParent(null);
-        this.minNode.setChild(null);
-        //insertAfter(child, );
+        HeapNode minNode = this.minNode;
+        HeapNode child = minNode.getChild();
+        if (child == null) {
+            minNode.getPrev().setNext(minNode.getNext());
+            minNode.getNext().setPrev(minNode.getPrev());
+        } else {
+            minNode.getPrev().setNext(child);
+            child.setPrev(minNode.getPrev());
+            child.setParent(null);
+        }
+        minNode.setChild(null);
+
+        int newTreesAmount = consolidate();
+        this.numOfTrees = newTreesAmount;
+        this.size--;
+
 
     }
 
