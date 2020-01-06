@@ -105,7 +105,7 @@ public class FibonacciHeap {
     }
 
     public int consolidate() {
-        int cellsAmount = (int) Math.ceil(Math.log(size()) / Math.log(GOLDEN));
+        int cellsAmount = 1+(int) Math.ceil(Math.log(size()) / Math.log(GOLDEN));
         HeapNode[] cells = new HeapNode[cellsAmount];
         toBuckets(cells);
         HeapNode[] res = fromBuckets(cells);
