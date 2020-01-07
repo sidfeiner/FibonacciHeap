@@ -367,6 +367,11 @@ public class FibonacciHeap {
                 cascadingCut(x, x.getParent());
             }
         }
+        else { //x was a root-check if it is new min
+            if(x.getKey()<minNode.getKey()){
+                minNode = x;
+            }
+        }
     }
 
     private void cascadingCut(HeapNode node, HeapNode parent) {
@@ -378,6 +383,7 @@ public class FibonacciHeap {
             /*parent is not marked, cut and break form cuts*/
             if (parent.isMarked == false) {
                 parent.mark();
+                numMarked++;
                 break;
             } else { /*keep cutting, node is now old parent, parent is old parents parent*/
                 node = curParent;
@@ -390,6 +396,7 @@ public class FibonacciHeap {
     private void cut(HeapNode node, HeapNode parent) {
         node.parent = null;
         node.unmark();
+        numMarked--;
         parent.setRank(parent.getRank() - 1);
         if (node.getNext() == node) {
             parent.child = null;

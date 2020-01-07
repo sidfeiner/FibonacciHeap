@@ -74,7 +74,6 @@ class HeapTest {
             while (!heap.isEmpty()) {
                 long expectedNumOfTrees = Integer.toBinaryString(numOfKeys - 1).chars().filter(ch -> ch == '1').count();
                 heap.deleteMin();
-                FiboHeapPrinter.printHeap(heap);
                 Thread.sleep(200);
                 assert (heap.getNumberOfTrees() == expectedNumOfTrees) : "number of internal trees isn't as expected after deleteMin";
                 numOfKeys -= 1;
@@ -297,14 +296,15 @@ class HeapTest {
         HeapTest test = new HeapTest();
 
         test.testEmpty();
-        test.testDeleteMin();
-        test.testPotential();
+        //test.testDeleteMin();
+		test.testDecreaseKey();
         test.testCountersRep();
         test.testTotalCuts();
         test.testDelete();
         //TODO.testTotalLinks()
-        test.testDecreaseKey();
+
         test.testKMin();
         test.testMeld();
+		test.testPotential();
     }
 }
