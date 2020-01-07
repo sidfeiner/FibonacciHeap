@@ -78,9 +78,16 @@ public class FibonacciHeap {
     }
 
     /**
-     * returns array with first root, last root, minimum root and amount of trees we have
+     * calls fromBuckets with default param unmarkRoots = true
      */
     private HeapNode[] fromBuckets(HeapNode[] cells) {
+        return fromBuckets(cells, true);
+    }
+
+    /**
+     * returns array with first root, last root, minimum root and amount of trees we have
+     */
+    private HeapNode[] fromBuckets(HeapNode[] cells, boolean unmarkRoots) {
         HeapNode minNode = null;
         HeapNode firstNode = null;
         HeapNode lastNode = null;
@@ -91,6 +98,7 @@ public class FibonacciHeap {
             if (cell != null) {
                 cur = cell;
                 treesAmount++;
+                if (unmarkRoots) cur.unmark();
                 if (firstNode == null) firstNode = cur;
                 if (minNode == null) {
                     minNode = cur;
@@ -444,12 +452,12 @@ public class FibonacciHeap {
         FibonacciHeap helperHeap = new FibonacciHeap();
         helperHeap.insert(k);
         helperHeap.first.setPointerToOriginalTree(H.findMin());
-        for (int i=0;i<k;i++){
+        for (int i = 0; i < k; i++) {
             HeapNode currentMin = helperHeap.findMin();
             arr[i] = currentMin.getKey();
             HeapNode child = currentMin.pointerToOriginalTree.getChild();
             helperHeap.deleteMin();
-            for(int j=0;j<currentMin.getRank();j++){
+            for (int j = 0; j < currentMin.getRank(); j++) {
                 helperHeap.insert(child.getKey());
                 helperHeap.first.setPointerToOriginalTree(child);
                 child = child.getNext();
@@ -503,7 +511,6 @@ public class FibonacciHeap {
         public HeapNode(int key) {
             this.key = key;
         }
-
 
 
         public int getKey() {
