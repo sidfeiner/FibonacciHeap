@@ -99,8 +99,10 @@ public class FibonacciHeap {
                 cur = cell;
                 treesAmount++;
                 if (unmarkRoots) {
-                    cur.unmark();
-                    numMarked--;
+                    if(cur.isMarked) {
+                        cur.unmark();
+                        numMarked--;
+                    }
                 }
                 if (firstNode == null) firstNode = cur;
                 if (minNode == null) {
@@ -331,7 +333,7 @@ public class FibonacciHeap {
             resArray[maxRank] = 1;
             return resArray;
         }
-        while (tempFirst != first) {
+        for (int i=0;i<numOfTrees;i++){
             arr[tempFirst.getRank()]++;
             if (tempFirst.getRank() > maxRank) { //update max rank
                 maxRank = tempFirst.getRank();
@@ -348,7 +350,7 @@ public class FibonacciHeap {
      * Deletes the node x from the heap.
      */
     public void delete(HeapNode x) {
-        decreaseKey(x, minNode.getKey() - 1);
+        decreaseKey(x, x.getKey()-minNode.getKey()+1);
         deleteMin();
     }
 
@@ -376,12 +378,12 @@ public class FibonacciHeap {
 
     private void cascadingCut(HeapNode node, HeapNode parent) {
         /*while parent is not the root*/
-        while (parent.getParent() != null) {
+        while (parent != null) {
             HeapNode curParent = parent;
             cut(node, parent);
             insertNodeAtStart(node);
             /*parent is not marked, cut and break form cuts*/
-            if (parent.isMarked == false) {
+            if (parent.isMarked == false && parent.getParent()!=null) {
                 parent.mark();
                 numMarked++;
                 break;
@@ -395,8 +397,10 @@ public class FibonacciHeap {
 
     private void cut(HeapNode node, HeapNode parent) {
         node.parent = null;
-        node.unmark();
-        numMarked--;
+        if(node.isMarked) {
+            node.unmark();
+            numMarked--;
+        }
         parent.setRank(parent.getRank() - 1);
         if (node.getNext() == node) {
             parent.child = null;
@@ -404,7 +408,8 @@ public class FibonacciHeap {
             parent.child = node.next;
             node.prev.next = node.next;
             node.next.prev = node.prev;
-
+            node.next = node;
+            node.prev = node;
         }
         totalCuts++;
 
@@ -419,7 +424,7 @@ public class FibonacciHeap {
      * The potential equals to the number of trees in the heap plus twice the number of marked nodes in the heap.
      */
     public int potential() {
-        return this.numOfTrees + 2 * this.numMarked; // should be replaced by student code
+        return this.numOfTrees + (2 *this.numMarked); // should be replaced by student code
     }
 
     /**
@@ -431,7 +436,7 @@ public class FibonacciHeap {
      * in its root.
      */
     public static int totalLinks() {
-        return totalLinks; // should be replaced by student code
+        return totalLinks;
     }
 
     /**
@@ -441,7 +446,7 @@ public class FibonacciHeap {
      * A cut operation is the operation which diconnects a subtree from its parent (during decreaseKey/delete methods).
      */
     public static int totalCuts() {
-        return totalCuts; // should be replaced by student code
+        return totalCuts;
     }
 
     /**
@@ -453,14 +458,14 @@ public class FibonacciHeap {
     public static int[] kMin(FibonacciHeap H, int k) {
         int[] arr = new int[k];
         FibonacciHeap helperHeap = new FibonacciHeap();
-        helperHeap.insert(k);
+        helperHeap.insert(H.findMin().getKey());
         helperHeap.first.setPointerToOriginalTree(H.findMin());
         for (int i = 0; i < k; i++) {
             HeapNode currentMin = helperHeap.findMin();
             arr[i] = currentMin.getKey();
             HeapNode child = currentMin.pointerToOriginalTree.getChild();
             helperHeap.deleteMin();
-            for (int j = 0; j < currentMin.getRank(); j++) {
+            for (int j = 0; j < currentMin.pointerToOriginalTree.getRank(); j++) {
                 helperHeap.insert(child.getKey());
                 helperHeap.first.setPointerToOriginalTree(child);
                 child = child.getNext();

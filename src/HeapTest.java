@@ -38,6 +38,11 @@ class HeapTest {
         return heap;
     }
 
+    private static void restartCutsLink(){
+        FibonacciHeap.totalCuts = 0;
+        FibonacciHeap.totalLinks = 0;
+    }
+
     void testEmpty() {
         FibonacciHeap heap = new FibonacciHeap();
 
@@ -90,7 +95,7 @@ class HeapTest {
 
         heap.deleteMin();
 
-
+        FiboHeapPrinter.printHeap(heap);
         node = heap.insert(0);
         heap.delete(node);
         assert (heap.findMin().key == 2) : "minimum is not updated correctly";
@@ -155,10 +160,12 @@ class HeapTest {
         }
         heap.deleteMin();
 
+
         heap.decreaseKey(nodes[7], 5);
         assert (FibonacciHeap.totalCuts == 1) : "incorrect cuts count";
 
         heap.decreaseKey(nodes[6], 2);
+
         assert (FibonacciHeap.totalCuts == 3) : "incorrect cuts count";
 
         heap.decreaseKey(nodes[3], 3);
@@ -297,12 +304,15 @@ class HeapTest {
 
         test.testEmpty();
         //test.testDeleteMin();
-		test.testDecreaseKey();
-        test.testCountersRep();
         test.testTotalCuts();
+        restartCutsLink();
+		test.testPotential();
+
+
+		test.testDecreaseKey();
         test.testDelete();
         //TODO.testTotalLinks()
-
+		test.testCountersRep();
         test.testKMin();
         test.testMeld();
 		test.testPotential();
