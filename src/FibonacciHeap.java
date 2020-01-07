@@ -98,7 +98,10 @@ public class FibonacciHeap {
             if (cell != null) {
                 cur = cell;
                 treesAmount++;
-                if (unmarkRoots) cur.unmark();
+                if (unmarkRoots) {
+                    cur.unmark();
+                    numMarked--;
+                }
                 if (firstNode == null) firstNode = cur;
                 if (minNode == null) {
                     minNode = cur;
