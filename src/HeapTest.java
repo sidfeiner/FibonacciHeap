@@ -38,7 +38,7 @@ class HeapTest {
         return heap;
     }
 
-    private static void restartCutsLink(){
+    private static void restartCutsLink() {
         FibonacciHeap.totalCuts = 0;
         FibonacciHeap.totalLinks = 0;
     }
@@ -56,18 +56,18 @@ class HeapTest {
         System.out.println("testEmpty Passed!");
     }
 
-    void testDeleteMin() throws InterruptedException{
+    void testDeleteMin() throws InterruptedException {
         int[] arr = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
         FibonacciHeap heap = arrayToHeap(arr);
 
         assert (heap.findMin() != null);
-        assert (heap.findMin().key == 0) : "minimal key isn't as expected";
+        assert (heap.findMin().getKey() == 0) : "minimal key isn't as expected";
         assert (heap.getNumberOfTrees() == 16) : "number of internal trees isn't as expected";
 
         heap.deleteMin();
 
         assert (heap.findMin() != null);
-        assert (heap.findMin().key == 1) : "minimal key isn't as expected after deleteMin";
+        assert (heap.findMin().getKey() == 1) : "minimal key isn't as expected after deleteMin";
         assert (heap.getNumberOfTrees() == 4) : "number of internal trees isn't as expected after deleteMin";
 
         for (int tries = 1; tries < 5; tries++) {
@@ -79,7 +79,6 @@ class HeapTest {
             while (!heap.isEmpty()) {
                 long expectedNumOfTrees = Integer.toBinaryString(numOfKeys - 1).chars().filter(ch -> ch == '1').count();
                 heap.deleteMin();
-                Thread.sleep(200);
                 assert (heap.getNumberOfTrees() == expectedNumOfTrees) : "number of internal trees isn't as expected after deleteMin";
                 numOfKeys -= 1;
             }
@@ -98,19 +97,19 @@ class HeapTest {
         FiboHeapPrinter.printHeap(heap);
         node = heap.insert(0);
         heap.delete(node);
-        assert (heap.findMin().key == 2) : "minimum is not updated correctly";
+        assert (heap.findMin().getKey() == 2) : "minimum is not updated correctly";
         assert (heap.size() == 9) : "new size is incorrect";
 
         node = heap.findMin();
         heap.delete(node);
-        assert (heap.findMin().key == 3) : "minimum is not updated correctly";
+        assert (heap.findMin().getKey() == 3) : "minimum is not updated correctly";
         assert (heap.size() == 8) : "new size is incorrect";
 
 
         node = heap.insert(15);
         assert (heap.size() == 9) : "insert problem";
         heap.delete(node);
-        assert (heap.findMin().key == 3) : "minimum is not updated correctly";
+        assert (heap.findMin().getKey() == 3) : "minimum is not updated correctly";
         assert (heap.size() == 8) : "new size is incorrect";
 
         System.out.println("testDelete Passed!");
@@ -126,7 +125,7 @@ class HeapTest {
         node = heap.insert(15);
         heap.decreaseKey(node, 15);
 
-        assert (heap.findMin().key == 0) : "minimum is not updated correctly";
+        assert (heap.findMin().getKey() == 0) : "minimum is not updated correctly";
 
         heap.deleteMin();
 
@@ -140,7 +139,7 @@ class HeapTest {
         for (int i = 10; i > 0; i--) {
 
             heap.decreaseKey(nodes[i], 20);
-            assert (heap.findMin().key == nodes[i].key) : "incorrect minimum";
+            assert (heap.findMin().getKey() == nodes[i].getKey()) : "incorrect minimum";
         }
 
         System.out.println("testDecreaseKey Passed!");
@@ -266,33 +265,33 @@ class HeapTest {
         FibonacciHeap heap2 = arrayToHeap(arr2);
         heap1.meld(heap2);
 
-        assert (heap1.findMin().key == 0) : "incorrect min";
+        assert (heap1.findMin().getKey() == 0) : "incorrect min";
         assert (heap1.getNumberOfTrees() == 11) : "incorrect number of trees";
 
         for (int i = 0; i < 11; i++) {
-            assert (i == heap1.findMin().key) : "incorrect key";
+            assert (i == heap1.findMin().getKey()) : "incorrect key";
             heap1.deleteMin();
         }
 
         heap1 = arrayToHeap(arr1);
         FibonacciHeap heap3 = new FibonacciHeap();
         heap1.meld(heap3);
-        assert (heap1.findMin().key == 1) : "incorrect min";
+        assert (heap1.findMin().getKey() == 1) : "incorrect min";
         assert (heap1.getNumberOfTrees() == 8) : "incorrect number of trees";
 
         for (int i = 1; i < 9; i++) {
-            assert (i == heap1.findMin().key) : "incorrect key";
+            assert (i == heap1.findMin().getKey()) : "incorrect key";
             heap1.deleteMin();
         }
 
         heap3 = arrayToHeap(arr1);
         heap1 = new FibonacciHeap();
         heap1.meld(heap3);
-        assert (heap1.findMin().key == 1) : "incorrect min";
+        assert (heap1.findMin().getKey() == 1) : "incorrect min";
         assert (heap1.getNumberOfTrees() == 8) : "incorrect number of trees";
 
         for (int i = 1; i < 9; i++) {
-            assert (i == heap1.findMin().key) : "incorrect key";
+            assert (i == heap1.findMin().getKey()) : "incorrect key";
             heap1.deleteMin();
         }
 
@@ -303,18 +302,18 @@ class HeapTest {
         HeapTest test = new HeapTest();
 
         test.testEmpty();
-        //test.testDeleteMin();
+        test.testDeleteMin();
         test.testTotalCuts();
         restartCutsLink();
-		test.testPotential();
+        test.testPotential();
 
 
-		test.testDecreaseKey();
+        test.testDecreaseKey();
         test.testDelete();
         //TODO.testTotalLinks()
-		test.testCountersRep();
+        test.testCountersRep();
         test.testKMin();
         test.testMeld();
-		test.testPotential();
+        test.testPotential();
     }
 }

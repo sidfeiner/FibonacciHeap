@@ -20,6 +20,16 @@ public class FibonacciHeap {
     private int numMarked;
     private int numOfTrees;
 
+    public FibonacciHeap(HeapNode node, int size) {
+        this.minNode = node;
+        this.first = node;
+        this.last = node;
+        this.size = size;
+        this.numOfTrees = 1;
+    }
+
+    public FibonacciHeap() {
+    }
 
     /**
      * Links 2 nodes.
@@ -99,7 +109,7 @@ public class FibonacciHeap {
                 cur = cell;
                 treesAmount++;
                 if (unmarkRoots) {
-                    if(cur.isMarked) {
+                    if (cur.isMarked) {
                         cur.unmark();
                         numMarked--;
                     }
@@ -333,7 +343,7 @@ public class FibonacciHeap {
             resArray[maxRank] = 1;
             return resArray;
         }
-        for (int i=0;i<numOfTrees;i++){
+        for (int i = 0; i < numOfTrees; i++) {
             arr[tempFirst.getRank()]++;
             if (tempFirst.getRank() > maxRank) { //update max rank
                 maxRank = tempFirst.getRank();
@@ -350,7 +360,7 @@ public class FibonacciHeap {
      * Deletes the node x from the heap.
      */
     public void delete(HeapNode x) {
-        decreaseKey(x, x.getKey()-minNode.getKey()+1);
+        decreaseKey(x, x.getKey() - minNode.getKey() + 1);
         deleteMin();
     }
 
@@ -368,9 +378,8 @@ public class FibonacciHeap {
             if (x.getParent().getKey() > x.getKey()) {
                 cascadingCut(x, x.getParent());
             }
-        }
-        else { //x was a root-check if it is new min
-            if(x.getKey()<minNode.getKey()){
+        } else { //x was a root-check if it is new min
+            if (x.getKey() < minNode.getKey()) {
                 minNode = x;
             }
         }
@@ -383,7 +392,7 @@ public class FibonacciHeap {
             cut(node, parent);
             insertNodeAtStart(node);
             /*parent is not marked, cut and break form cuts*/
-            if (parent.isMarked == false && parent.getParent()!=null) {
+            if (parent.isMarked == false && parent.getParent() != null) {
                 parent.mark();
                 numMarked++;
                 break;
@@ -397,7 +406,7 @@ public class FibonacciHeap {
 
     private void cut(HeapNode node, HeapNode parent) {
         node.parent = null;
-        if(node.isMarked) {
+        if (node.isMarked) {
             node.unmark();
             numMarked--;
         }
@@ -424,7 +433,7 @@ public class FibonacciHeap {
      * The potential equals to the number of trees in the heap plus twice the number of marked nodes in the heap.
      */
     public int potential() {
-        return this.numOfTrees + (2 *this.numMarked); // should be replaced by student code
+        return this.numOfTrees + (2 * this.numMarked); // should be replaced by student code
     }
 
     /**
@@ -507,7 +516,7 @@ public class FibonacciHeap {
      */
     public class HeapNode {
 
-        public int key;
+        private int key;
         private int rank;
         private boolean isMarked;
         private HeapNode child;
