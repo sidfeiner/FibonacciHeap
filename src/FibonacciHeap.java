@@ -144,7 +144,7 @@ public class FibonacciHeap {
     }
 
     public int consolidate() {
-        int cellsAmount = 1 + (int) Math.ceil(Math.log(size()) / Math.log(GOLDEN));
+        int cellsAmount = (int) (1 + Math.ceil(Math.log(size()) / Math.log(GOLDEN)));
         HeapNode[] cells = new HeapNode[cellsAmount];
         toBuckets(cells);
         HeapNode[] res = fromBuckets(cells);
@@ -223,6 +223,16 @@ public class FibonacciHeap {
         totalLinks = 0;
     }
 
+    public static void untieChildren(HeapNode node) {
+        if (node.getChild() != null) {
+            HeapNode cur = node.getChild();
+            do {
+                cur.setParent(null);
+                cur = cur.getNext();
+            } while (cur != node.getChild());
+        }
+    }
+
     private void deleteRoot(HeapNode root) {
         HeapNode child = root.getChild();
         if (root == this.first) {
@@ -242,7 +252,7 @@ public class FibonacciHeap {
                 root.getNext().setPrev(rightMostChild);
                 rightMostChild.setNext(root.getNext());
             }
-            child.setParent(null);
+            untieChildren(root);
         }
         root.setChild(null);
     }
@@ -372,7 +382,7 @@ public class FibonacciHeap {
      */
     public void decreaseKey(HeapNode x, int delta) {
         x.setKey(x.getKey() - delta);
-        if(x.getKey()<minNode.getKey()){
+        if (x.getKey() < minNode.getKey()) {
             minNode = x;
         }
         /*if x is not a root check if we need to cut*/
@@ -387,14 +397,14 @@ public class FibonacciHeap {
 
     private void cascadingCut(HeapNode node, HeapNode parent) {
         /*while node is not a root*/
-        while (node.getParent()!= null) {
+        while (node.getParent() != null) {
             cut(node, parent);
             insertNodeAtStart(node);
             /*parent is not marked, cut and break form cuts*/
-            if (!parent.isMarked && parent.getParent()!=null) {
+            if (!parent.isMarked && parent.getParent() != null) {
                 HeapNode tempNode = first;
-                for (int i=0;i<numOfTrees;i++){
-                    if(tempNode == parent){
+                for (int i = 0; i < numOfTrees; i++) {
+                    if (tempNode == parent) {
                         System.out.println("got here");
                     }
                     tempNode = tempNode.getNext();
@@ -412,7 +422,7 @@ public class FibonacciHeap {
 
     private void cut(HeapNode node, HeapNode parent) {
         node.setParent(null);
-        if(node.isMarked) {
+        if (node.isMarked) {
             node.unmark();
             numMarked--;
         }
