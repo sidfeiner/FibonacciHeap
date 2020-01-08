@@ -1,6 +1,9 @@
 /*
 //FibonacciHeap Tester
 
+import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
+
+import javax.xml.bind.SchemaOutputResolver;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -221,6 +224,8 @@ public class OfficialTest {
 
         for (int i = 2000; i < 2500; i++) {
             if (heap.findMin() != fibonacciHeap.findMin().getKey() || heap.size() != fibonacciHeap.size()) {
+                System.out.println("our min: " + fibonacciHeap.findMin().getKey());
+                System.out.println("their min: " + heap.findMin());
                 bugFound(test);
                 return;
             }
