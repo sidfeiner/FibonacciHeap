@@ -1,3 +1,5 @@
+import javax.sound.midi.Soundbank;
+import java.sql.SQLOutput;
 import java.util.Arrays;
 import java.util.logging.Logger;
 
@@ -103,6 +105,7 @@ public class FibonacciHeap {
                         cur.unmark();
                         numMarked--;
                     }
+                    cur.setParent(null);
                 }
                 if (firstNode == null) firstNode = cur;
                 if (minNode == null) {
@@ -134,7 +137,7 @@ public class FibonacciHeap {
     }
 
     public int consolidate() {
-        int cellsAmount = 1 + (int) Math.ceil(Math.log(size()) / Math.log(GOLDEN));
+        int cellsAmount = (int) (1+ Math.ceil(Math.log(size()) / Math.log(GOLDEN)));
         HeapNode[] cells = new HeapNode[cellsAmount];
         toBuckets(cells);
         HeapNode[] res = fromBuckets(cells);
@@ -350,7 +353,7 @@ public class FibonacciHeap {
      * Deletes the node x from the heap.
      */
     public void delete(HeapNode x) {
-        decreaseKey(x, x.getKey()-minNode.getKey()+1);
+        decreaseKey(x, x.getKey()+1+Math.abs(minNode.getKey()));
         deleteMin();
     }
 
@@ -362,6 +365,9 @@ public class FibonacciHeap {
      */
     public void decreaseKey(HeapNode x, int delta) {
         x.setKey(x.getKey() - delta);
+        if(x.getKey()<minNode.getKey()){
+            minNode = x;
+        }
         /*if x is not a root check if we need to cut*/
         if (x.getParent() != null) {
             /*if the decrease cause a heap violation*/
@@ -369,26 +375,31 @@ public class FibonacciHeap {
                 cascadingCut(x, x.getParent());
             }
         }
-        else { //x was a root-check if it is new min
-            if(x.getKey()<minNode.getKey()){
-                minNode = x;
-            }
-        }
+
     }
 
+    public int getNumOfTrees(){
+        return this.numOfTrees;
+    }
     private void cascadingCut(HeapNode node, HeapNode parent) {
-        /*while parent is not the root*/
-        while (parent != null) {
-            HeapNode curParent = parent;
+        /*while node is not a root*/
+        while (node.getParent()!= null) {
             cut(node, parent);
             insertNodeAtStart(node);
             /*parent is not marked, cut and break form cuts*/
-            if (parent.isMarked == false && parent.getParent()!=null) {
+            if (!parent.isMarked && parent.getParent()!=null) {
+                HeapNode tempNode = first;
+                for (int i=0;i<numOfTrees;i++){
+                    if(tempNode == parent){
+                        System.out.println("got here");
+                    }
+                    tempNode = tempNode.getNext();
+                }
                 parent.mark();
                 numMarked++;
-                break;
+                return;
             } else { /*keep cutting, node is now old parent, parent is old parents parent*/
-                node = curParent;
+                node = parent;
                 parent = node.getParent();
             }
         }
@@ -396,7 +407,7 @@ public class FibonacciHeap {
 
 
     private void cut(HeapNode node, HeapNode parent) {
-        node.parent = null;
+        node.setParent(null);
         if(node.isMarked) {
             node.unmark();
             numMarked--;
@@ -408,8 +419,8 @@ public class FibonacciHeap {
             parent.child = node.next;
             node.prev.next = node.next;
             node.next.prev = node.prev;
-            node.next = node;
-            node.prev = node;
+            node.next = null;
+            node.prev = null;
         }
         totalCuts++;
 

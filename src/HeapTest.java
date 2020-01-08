@@ -143,6 +143,8 @@ class HeapTest {
             assert (heap.findMin().key == nodes[i].key) : "incorrect minimum";
         }
 
+
+
         System.out.println("testDecreaseKey Passed!");
 
     }
