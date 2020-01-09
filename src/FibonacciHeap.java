@@ -1,4 +1,7 @@
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 import java.util.logging.Logger;
 
 /**
@@ -223,7 +226,7 @@ public class FibonacciHeap {
         totalLinks = 0;
     }
 
-    public static void untieChildren(HeapNode node) {
+    private static void untieChildren(HeapNode node) {
         if (node.getChild() != null) {
             HeapNode cur = node.getChild();
             do {
@@ -341,27 +344,27 @@ public class FibonacciHeap {
      * Return a counters array, where the value of the i-th entry is the number of trees of order i in the heap.
      */
     public int[] countersRep() {
-        int[] arr = new int[size];
-        int treeCount = 0;
         int maxRank = 0;
 
+        HashMap<Integer, Integer> hashMap = new HashMap<>();
+
         HeapNode tempFirst = first;
-        //only 1 node in heap
-        if (size == 1) {
-            maxRank = first.getRank();
-            int[] resArray = new int[maxRank + 1];
-            resArray[maxRank] = 1;
-            return resArray;
-        }
         for (int i = 0; i < numOfTrees; i++) {
-            arr[tempFirst.getRank()]++;
-            if (tempFirst.getRank() > maxRank) { //update max rank
+            if (tempFirst.getRank() > maxRank) {
                 maxRank = tempFirst.getRank();
+            }
+            if (hashMap.containsKey(tempFirst.getRank())) {
+                hashMap.put(tempFirst.getRank(), hashMap.get(tempFirst.getRank()) + 1);
+            } else {
+                hashMap.put(tempFirst.getRank(), 1);
             }
             tempFirst = tempFirst.getNext();
         }
-        int[] resArray = Arrays.copyOf(arr, maxRank + 1);
-        return resArray;
+        int[] arr = new int[maxRank + 1];
+        for (Integer k : hashMap.keySet()) {
+            arr[k] = hashMap.get(k);
+        }
+        return arr;
     }
 
     /**
@@ -474,6 +477,10 @@ public class FibonacciHeap {
         return totalCuts;
     }
 
+    public HeapNode getFirst() {
+        return first;
+    }
+
     /**
      * public static int[] kMin(FibonacciHeap H, int k)
      * <p>
@@ -502,24 +509,6 @@ public class FibonacciHeap {
 
     public int getNumberOfTrees() {
         return numOfTrees;
-    }
-
-    public int calcualteNumOfTrees() {
-        int i = size == 0 ? 0 : 1;
-        HeapNode cur = this.first.getNext();
-        while (cur != this.first) {
-            i++;
-            cur = cur.getNext();
-        }
-        return i;
-    }
-
-    public HeapNode getFirst() {
-        return first;
-    }
-
-    public void setSize(int i) {
-        this.size = i;
     }
 
 
@@ -572,10 +561,6 @@ public class FibonacciHeap {
 
         public HeapNode getPrev() {
             return this.prev;
-        }
-
-        public boolean isMarked() {
-            return this.isMarked;
         }
 
         public void setRank(int rank) {
