@@ -94,7 +94,6 @@ class HeapTest {
 
         heap.deleteMin();
 
-        FiboHeapPrinter.printHeap(heap);
         node = heap.insert(0);
         heap.delete(node);
         assert (heap.findMin().getKey() == 2) : "minimum is not updated correctly";
