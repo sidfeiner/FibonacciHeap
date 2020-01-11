@@ -1,12 +1,61 @@
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class Test {
+
+    static class DecreasedKey {
+        private int key;
+        private int delta;
+
+        public DecreasedKey(int key, int delta) {
+            this.key = key;
+            this.delta = delta;
+        }
+
+        public int getKey() {
+            return key;
+        }
+
+        public int getDelta() {
+            return delta;
+        }
+
+        @Override
+        public String toString() {
+            return "DecreasedKey{" +
+                    "key=" + key +
+                    ", delta=" + delta +
+                    '}';
+        }
+    }
+
+    static class DeleteException extends Exception {
+        int deleteKey;
+
+        public DeleteException(int deleteKey, String s) {
+            super(s);
+            this.deleteKey = deleteKey;
+        }
+
+        public int getDeleteKey() {
+            return deleteKey;
+        }
+    }
+
+    static class DecreasedKeyException extends Exception {
+        private List<DecreasedKey> keys;
+
+        public DecreasedKeyException(List<DecreasedKey> keys, String msg, Throwable ex) {
+            super(msg, ex);
+            this.keys = keys;
+        }
+
+        public List<DecreasedKey> getKeys() {
+            return keys;
+        }
+    }
 
     public static class CreateHeapResult {
         private List<Integer> insertOrder;
@@ -53,19 +102,6 @@ public class Test {
     public static Logger logger = Logger.getLogger("Test");
 
 
-    public static FibonacciHeap testMeld() {
-        Random rand = new Random();
-
-        CreateHeapResult res1 = createHeap(1, 3);
-
-        CreateHeapResult res2 = createHeap(4, 6);
-
-        res1.getHeap().meld(res2.getHeap());
-
-
-        return res1.getHeap();
-    }
-
     public static CreateHeapResult createHeap(int from, int to) {
         return createHeap(from, to, false);
     }
@@ -86,14 +122,17 @@ public class Test {
         return (int) Integer.toBinaryString(size).chars().filter(ch -> ch == '1').count();
     }
 
-    public static void testInserts(FibonacciHeap heap, List<Integer> keys) {
+
+    public static Map<Integer, FibonacciHeap.HeapNode> testInserts(FibonacciHeap heap, List<Integer> keys) {
         int size = heap.size();
         double minKey = Double.POSITIVE_INFINITY;
+        Map<Integer, FibonacciHeap.HeapNode> nodes = new HashMap<>();
+        int i = 0;
         for (Integer n : keys) {
             if (n < minKey) {
                 minKey = n;
             }
-            heap.insert(n);
+            nodes.put(n, heap.insert(n));
             testFibHeap(heap);
             size++;
             testHeapFields(
@@ -102,9 +141,10 @@ public class Test {
                     )
             );
         }
+        return nodes;
     }
 
-    public static void testDeletes(FibonacciHeap heap, List<Integer> orderedKeys) {
+    public static void testDeletes(FibonacciHeap heap, List<Integer> orderedKeys) throws DeleteException {
         int size = heap.size();
         Integer expectedSize;
         for (Integer minVal : orderedKeys) {
@@ -115,7 +155,11 @@ public class Test {
             }
             expectedSize = size == heap.size() ? null : expectedNumOfTrees(size);
             testHeapFields(heap, new ExpectedFields(size, expectedSize, minVal));
-            heap.deleteMin();
+            try {
+                heap.deleteMin();
+            } catch (Exception ex) {
+                throw new DeleteException(heap.findMin().getKey(), "error deleting key " + heap.findMin());
+            }
             size--;
         }
     }
@@ -129,17 +173,76 @@ public class Test {
         return vals;
     }
 
+    public static int getNumMarked(FibonacciHeap heap) {
+        return (heap.potential() - heap.getNumberOfTrees()) / 2;
+    }
+
+    public static void testDecreaseKey(FibonacciHeap heap, Map<Integer, FibonacciHeap.HeapNode> nodes, int amount) throws DecreasedKeyException {
+        int randIndex, delta;
+        FibonacciHeap.HeapNode[] nodesArr = new FibonacciHeap.HeapNode[nodes.size()];
+        List<DecreasedKey> decreasedKeys = new ArrayList<>();
+        int i = 0;
+        for (Map.Entry<Integer, FibonacciHeap.HeapNode> entry : nodes.entrySet()) {
+            nodesArr[i++] = entry.getValue();
+        }
+        Random random = new Random(0L);
+        int newKey, oldKey;
+        try {
+            for (i = 0; i < amount; i++) {
+                do {
+                    randIndex = random.nextInt(nodesArr.length);
+                    delta = Math.max(1, random.nextInt(nodesArr.length));
+                    oldKey = nodesArr[randIndex].getKey();
+                    newKey = oldKey - delta;
+                } while (nodes.containsKey(newKey));
+                int old = nodes.get(oldKey).getKey();
+                decreasedKeys.add(new DecreasedKey(oldKey, delta));
+                heap.decreaseKey(nodes.get(oldKey), delta);
+                nodes.put(newKey, nodes.remove(oldKey));
+                testFibHeap(heap);
+            }
+        } catch (Exception ex) {
+            throw new DecreasedKeyException(decreasedKeys, "Error during decreasedKey", ex);
+        }
+    }
+
+    public static void testMeld(FibonacciHeap heap, int upperBound) {
+        CreateHeapResult res = createHeap(upperBound, upperBound + 20, false);
+        FibonacciHeap heap2 = res.getHeap();
+        int size = heap.size(), numOfTrees = heap.getNumberOfTrees(), numMarked = getNumMarked(heap);
+        heap.meld(heap2);
+        if (heap.size() != size + heap2.size()) {
+            throw new RuntimeException("size after meld is not sum of both heaps");
+        }
+        if (heap.getNumberOfTrees() != numOfTrees + heap2.getNumberOfTrees()) {
+            throw new RuntimeException("numOfTrees after meld is not sum of both heaps");
+        }
+        if (getNumMarked(heap) != numMarked + getNumMarked(heap2)) {
+            throw new RuntimeException("numMarked after meld is not sum of both heaps");
+        }
+    }
+
     public static void testKMin(FibonacciHeap heap) {
         FibonacciHeap.HeapNode cur = heap.getFirst();
+        FibonacciHeap.HeapNode next;
         Random rand = new Random(0L);
         int kMin;
         int[] kMinVals, dumbKMinVals;
+        FibonacciHeap heaps[] = new FibonacciHeap[heap.getNumberOfTrees()];
+        int heapIndex = 0;
         do {
-            FibonacciHeap treeAsHeap = new FibonacciHeap(cur, Test.countTreeItems(cur));
-            if (treeAsHeap.size() > 0) {
-                kMin = rand.nextInt(treeAsHeap.size());
-                kMinVals = FibonacciHeap.kMin(treeAsHeap, kMin);
-                dumbKMinVals = dumbKMin(treeAsHeap, kMin);
+            next = cur.getNext();
+            cur.setPrev(cur);
+            cur.setNext(cur);
+            heaps[heapIndex] = new FibonacciHeap(cur, Test.countTreeItems(cur));
+            heapIndex++;
+            cur = next;
+        } while (next != null && next != heap.getFirst());
+        for (FibonacciHeap fHeap : heaps) {
+            if (fHeap.size() > 0) {
+                kMin = rand.nextInt(fHeap.size());
+                kMinVals = FibonacciHeap.kMin(fHeap, kMin);
+                dumbKMinVals = dumbKMin(fHeap, kMin);
                 if (kMinVals.length != dumbKMinVals.length) {
                     throw new RuntimeException("kMin has wrong amount of values");
                 } else {
@@ -150,14 +253,13 @@ public class Test {
                     }
                 }
             }
-            cur = cur.getNext();
-        } while (cur != heap.getFirst());
+        }
     }
 
     public static void testRootPointers(FibonacciHeap heap) {
         FibonacciHeap.HeapNode cur = heap.getFirst();
         do {
-            if (cur==null) {
+            if (cur == null) {
                 throw new RuntimeException("we have a tree with root null");
             }
             if (cur.getNext().getPrev() != cur)
@@ -196,17 +298,47 @@ public class Test {
         }
     }
 
+    public static void testFibMin(FibonacciHeap heap) {
+        FibonacciHeap.HeapNode cur = heap.getFirst();
+        do {
+            if (cur.getKey() < heap.findMin().getKey()) {
+                throw new RuntimeException(String.format("minimum must be %s but is %s", heap.findMin().getKey(), cur.getKey()));
+            }
+            cur = cur.getNext();
+        } while (cur != heap.getFirst());
+    }
+
+    public static int calculateNumOfTrees(FibonacciHeap heap) {
+        int i = heap.size() == 0 ? 0 : 1;
+        FibonacciHeap.HeapNode cur = heap.getFirst().getNext();
+        while (cur != heap.getFirst()) {
+            i++;
+            cur = cur.getNext();
+        }
+        return i;
+    }
+
+
+    public static void testNumOfTrees(FibonacciHeap heap) {
+        int actualNumOfTrees = calculateNumOfTrees(heap);
+        if (actualNumOfTrees != heap.getNumberOfTrees()) {
+            throw new RuntimeException(String.format("should have %s trees but counted %s", heap.getNumberOfTrees(), actualNumOfTrees));
+        }
+    }
+
     public static void testFibHeap(FibonacciHeap heap) {
         FibonacciHeap.HeapNode first = heap.findMin();
         FibonacciHeap.HeapNode cur = first;
         testRootPointers(heap);
+        testNumOfTrees(heap);
         do {
             testHeapMinProp(cur);
             testChildren(cur);
             testSiblings(cur);
             testRanks(cur);
             cur = cur.getNext();
-        } while (first != cur);
+        } while (cur != first);
+        testFibMin(heap); // Minimum must be one of the roots otherwise testHeapMinProp would have failed
     }
 
     /**
@@ -301,8 +433,9 @@ public class Test {
         }
     }
 
-    public static void testRandomHeap(int size) {
-        List<Integer> keys = IntStream.rangeClosed(0, size).boxed().collect(Collectors.toList());
+    public static void testRandomHeap(int size, int jumps) throws Exception {
+        List<Integer> keys = IntStream.rangeClosed(0, size).boxed().map(x -> x * jumps).collect(Collectors.toList());
+
         Collections.shuffle(keys);
         List<Integer> orderedKeys = new ArrayList<>(keys);
         try {
@@ -310,55 +443,65 @@ public class Test {
             FibonacciHeap heap = new FibonacciHeap();
             System.out.println("-testing inserts");
             testInserts(heap, keys);
-            //BTreePrinter.printNode(tree.getRoot());
             System.out.println("-testing deletes");
             testDeletes(heap, orderedKeys);
             System.out.println("-testing kMin");
-            testInserts(heap, keys);
-            heap.deleteMin();
+            testInserts(heap, keys);  // Repopulate after delete
+            heap.deleteMin();  // Make valid heap structure
             testKMin(heap);
-        } catch (Exception ex) {
+            // After kMin, tree is destroyed, reset
+            heap = new FibonacciHeap();
+            testInserts(heap, keys);
+            System.out.println("-testing meld");
+            testMeld(heap, size + 1);
+            System.out.println("-testing decreaseKey");
+            heap = new FibonacciHeap();
+            Map<Integer, FibonacciHeap.HeapNode> nodes = testInserts(heap, keys);
+            nodes.remove(heap.findMin().getKey());
+            heap.deleteMin();
+            testDecreaseKey(heap, nodes, nodes.size() / 2);
 
+
+        } catch (DeleteException ex) {
+            System.out.println("inserted: " + keys.toString());
+            System.out.println("failed deleting minimum when min = " + ex.deleteKey);
+            throw ex;
+        } catch (DecreasedKeyException ex) {
+            System.out.println("inserted: " + keys.toString());
+            System.out.println("order of decreased keys: " + ex.getKeys().toString());
+        } catch (Exception ex) {
+            System.out.println("inserted: " + keys.toString());
+            throw ex;
         }
     }
 
-    public static void testInsertAndThenDelete() {
+    public static void testTrees() throws Exception {
 
-        System.out.println("tesing tree of size 0");
+        System.out.println("testing tree of size 0");
         CreateHeapResult res = createHeap(0, -1);
         testHeapFields(res.getHeap(), new ExpectedFields(0, 0, null));
         res = createHeap(1, 1);
-        System.out.println("tesing tree of size 1");
+        System.out.println("testing tree of size 1");
         testHeapFields(res.getHeap(), new ExpectedFields(1, 1, 1));
-        res.getHeap().deleteMin();
+        int delta = 5;
+        res.getHeap().decreaseKey(res.getHeap().findMin(), delta);
+        testHeapFields(res.getHeap(), new ExpectedFields(1, 1, 1 - delta));
+        res.getHeap().delete(res.getHeap().findMin());
         testHeapFields(res.getHeap(), new ExpectedFields(0, 0, null));
 
-
         Random rand = new Random(0L);
-
-        for (int i = 0; i < 200; i++) {
+        int jumps;
+        for (int i = 0; i < 100; i++) {
             int size = rand.nextInt(10000);
+            jumps = rand.nextInt(10) + 3;
             System.out.println("testing tree of size " + size);
-            testRandomHeap(size);
+            testRandomHeap(size, jumps);
         }
-
-
     }
 
-    public static void main(String[] args) {
-
-        testInsertAndThenDelete();
-
-       /* FibonacciHeap heap = createHeap(10);
-        for (int k : keys) {
-            heap.insert(k);
-        }
-        for (int i = 0; i < keys.length; i++) {
-            heap.deleteMin();
-            FiboHeapPrinter.printHeap(heap);
-        }
-        System.out.println("done");*/
-        //FibonacciHeap heap1 = testMeld();
-        //heap1.printHeap();
+    public static void main(String[] args) throws Exception {
+        System.out.println("I <3 male Guy");
+        testTrees();
+        System.out.println("Dankovich");
     }
 }

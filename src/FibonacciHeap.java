@@ -165,7 +165,7 @@ public class FibonacciHeap {
      * is empty.
      */
     public boolean isEmpty() {
-        return size == 0; // should be replaced by student code
+        return size == 0;
     }
 
     /**
@@ -332,7 +332,7 @@ public class FibonacciHeap {
      * Return the number of elements in the heap
      */
     public int size() {
-        return this.size; // should be replaced by student code
+        return this.size;
     }
 
     /**
@@ -449,7 +449,7 @@ public class FibonacciHeap {
      * The potential equals to the number of trees in the heap plus twice the number of marked nodes in the heap.
      */
     public int potential() {
-        return this.numOfTrees + (2 * this.numMarked); // should be replaced by student code
+        return this.numOfTrees + (2 * this.numMarked);
     }
 
     /**
@@ -502,16 +502,6 @@ public class FibonacciHeap {
 
     public int getNumberOfTrees() {
         return numOfTrees;
-    }
-
-    public int calcualteNumOfTrees() {
-        int i = size == 0 ? 0 : 1;
-        HeapNode cur = this.first.getNext();
-        while (cur != this.first) {
-            i++;
-            cur = cur.getNext();
-        }
-        return i;
     }
 
     public HeapNode getFirst() {
