@@ -220,35 +220,43 @@ public class Test {
         if (getNumMarked(heap) != numMarked + getNumMarked(heap2)) {
             throw new RuntimeException("numMarked after meld is not sum of both heaps");
         }
+        testFibHeap(heap);
     }
 
     public static void testKMin(FibonacciHeap heap) {
-        FibonacciHeap.HeapNode cur = heap.getFirst();
-        FibonacciHeap.HeapNode next;
-        Random rand = new Random(0L);
-        int kMin;
-        int[] kMinVals, dumbKMinVals;
-        FibonacciHeap heaps[] = new FibonacciHeap[heap.getNumberOfTrees()];
-        int heapIndex = 0;
-        do {
-            next = cur.getNext();
-            cur.setPrev(cur);
-            cur.setNext(cur);
-            heaps[heapIndex] = new FibonacciHeap(cur, Test.countTreeItems(cur));
-            heapIndex++;
-            cur = next;
-        } while (next != null && next != heap.getFirst());
-        for (FibonacciHeap fHeap : heaps) {
-            if (fHeap.size() > 0) {
-                kMin = rand.nextInt(fHeap.size());
-                kMinVals = FibonacciHeap.kMin(fHeap, kMin);
-                dumbKMinVals = dumbKMin(fHeap, kMin);
-                if (kMinVals.length != dumbKMinVals.length) {
-                    throw new RuntimeException("kMin has wrong amount of values");
-                } else {
-                    for (int i = 0; i < kMinVals.length; i++) {
-                        if (kMinVals[i] != dumbKMinVals[i]) {
-                            throw new RuntimeException("kMin returns wrong values");
+        if (heap.size() == 0) {
+            int[] kMinVals = FibonacciHeap.kMin(heap, 0);
+            if (kMinVals.length != 0) {
+                throw new RuntimeException("kMin did not return empty array for empty heap");
+            }
+        } else {
+            FibonacciHeap.HeapNode cur = heap.getFirst();
+            FibonacciHeap.HeapNode next;
+            Random rand = new Random(0L);
+            int kMin;
+            int[] kMinVals, dumbKMinVals;
+            FibonacciHeap heaps[] = new FibonacciHeap[heap.getNumberOfTrees()];
+            int heapIndex = 0;
+            do {
+                next = cur.getNext();
+                cur.setPrev(cur);
+                cur.setNext(cur);
+                heaps[heapIndex] = new FibonacciHeap(cur, Test.countTreeItems(cur));
+                heapIndex++;
+                cur = next;
+            } while (next != null && next != heap.getFirst());
+            for (FibonacciHeap fHeap : heaps) {
+                if (fHeap.size() > 0) {
+                    kMin = rand.nextInt(fHeap.size());
+                    kMinVals = FibonacciHeap.kMin(fHeap, kMin);
+                    dumbKMinVals = dumbKMin(fHeap, kMin);
+                    if (kMinVals.length != dumbKMinVals.length) {
+                        throw new RuntimeException("kMin has wrong amount of values");
+                    } else {
+                        for (int i = 0; i < kMinVals.length; i++) {
+                            if (kMinVals[i] != dumbKMinVals[i]) {
+                                throw new RuntimeException("kMin returns wrong values");
+                            }
                         }
                     }
                 }
@@ -480,9 +488,11 @@ public class Test {
         System.out.println("testing tree of size 0");
         CreateHeapResult res = createHeap(0, -1);
         testHeapFields(res.getHeap(), new ExpectedFields(0, 0, null));
-        res = createHeap(1, 1);
+        testKMin(res.getHeap());
         System.out.println("testing tree of size 1");
+        res = createHeap(1, 1);
         testHeapFields(res.getHeap(), new ExpectedFields(1, 1, 1));
+        testKMin(res.getHeap());
         int delta = 5;
         res.getHeap().decreaseKey(res.getHeap().findMin(), delta);
         testHeapFields(res.getHeap(), new ExpectedFields(1, 1, 1 - delta));

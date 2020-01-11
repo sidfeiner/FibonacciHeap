@@ -485,18 +485,20 @@ public class FibonacciHeap {
      */
     public static int[] kMin(FibonacciHeap H, int k) {
         int[] arr = new int[k];
-        FibonacciHeap helperHeap = new FibonacciHeap();
-        helperHeap.insert(H.findMin().getKey());
-        helperHeap.first.setPointerToOriginalTree(H.findMin());
-        for (int i = 0; i < k; i++) {
-            HeapNode currentMin = helperHeap.findMin();
-            arr[i] = currentMin.getKey();
-            HeapNode child = currentMin.pointerToOriginalTree.getChild();
-            helperHeap.deleteMin();
-            for (int j = 0; j < currentMin.pointerToOriginalTree.getRank(); j++) {
-                helperHeap.insert(child.getKey());
-                helperHeap.first.setPointerToOriginalTree(child);
-                child = child.getNext();
+        if (k > 0 && H.size > 0) {
+            FibonacciHeap helperHeap = new FibonacciHeap();
+            helperHeap.insert(H.findMin().getKey());
+            helperHeap.first.setPointerToOriginalTree(H.findMin());
+            for (int i = 0; i < k; i++) {
+                HeapNode currentMin = helperHeap.findMin();
+                arr[i] = currentMin.getKey();
+                HeapNode child = currentMin.pointerToOriginalTree.getChild();
+                helperHeap.deleteMin();
+                for (int j = 0; j < currentMin.pointerToOriginalTree.getRank(); j++) {
+                    helperHeap.insert(child.getKey());
+                    helperHeap.first.setPointerToOriginalTree(child);
+                    child = child.getNext();
+                }
             }
         }
         return arr;
