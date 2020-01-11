@@ -3,7 +3,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class Test {
+public class FiboHeapTest {
 
     static class DecreasedKey {
         private int key;
@@ -241,7 +241,7 @@ public class Test {
                 next = cur.getNext();
                 cur.setPrev(cur);
                 cur.setNext(cur);
-                heaps[heapIndex] = new FibonacciHeap(cur, Test.countTreeItems(cur));
+                heaps[heapIndex] = new FibonacciHeap(cur, countTreeItems(cur));
                 heapIndex++;
                 cur = next;
             } while (next != null && next != heap.getFirst());
