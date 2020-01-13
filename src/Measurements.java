@@ -16,7 +16,7 @@ public class Measurements {
         System.out.println("######################## Measurement 1 ########################");
         FibonacciHeap.HeapNode node;
         int nodeIndex;
-        for (int pow = 10; pow <= 12; pow++) {
+        for (int pow = 5; pow <= 12; pow++) {
             int m = (int) Math.pow(2, pow);
             FibonacciHeap.totalCuts = 0;
             FibonacciHeap.totalLinks = 0;
@@ -24,7 +24,7 @@ public class Measurements {
             System.out.println("run for m=" + m);
             FibonacciHeap.HeapNode[] nodes = new FibonacciHeap.HeapNode[m+1];
             FibonacciHeap heap = new FibonacciHeap();
-            long start = System.currentTimeMillis();
+            long start = System.nanoTime();
             for (int j = m; j >= 0; j--) {
                 node = heap.insert(j);
                 nodes[j] = node;
@@ -35,7 +35,7 @@ public class Measurements {
                 heap.decreaseKey(nodes[nodeIndex], 150);
             }
             heap.decreaseKey(nodes[m - 1], 10);
-            System.out.println("time ms: " + (System.currentTimeMillis() - start));
+            System.out.println("time ms: " + ((System.nanoTime() - start))/1000);
             System.out.println("totalLinks=" + FibonacciHeap.totalLinks());
             System.out.println("totalCuts=" + FibonacciHeap.totalCuts());
             System.out.println("potential=" + heap.potential());
@@ -52,7 +52,7 @@ public class Measurements {
             System.out.println("run for m=" + m);
             FibonacciHeap.HeapNode[] nodes = new FibonacciHeap.HeapNode[m];
             FibonacciHeap heap = new FibonacciHeap();
-            long start = System.currentTimeMillis();
+            long start = System.nanoTime();
             for (int j = m - 1; j >= 0; j--) {
                 node = heap.insert(j);
                 nodes[j] = node;
@@ -60,7 +60,7 @@ public class Measurements {
             for (int j = 0; j < m / 2; j++) {
                 heap.deleteMin();
             }
-            System.out.println("time ms: " + (System.currentTimeMillis() - start));
+            System.out.println("time ms: " + ((System.nanoTime() - start)/1000));
             System.out.println("totalLinks=" + FibonacciHeap.totalLinks());
             System.out.println("totalCuts=" + FibonacciHeap.totalCuts());
             System.out.println("potential=" + heap.potential());
