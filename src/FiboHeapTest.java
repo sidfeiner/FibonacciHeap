@@ -111,7 +111,7 @@ public class FiboHeapTest {
         Collections.shuffle(l);
         FibonacciHeap heap = new FibonacciHeap();
         for (Integer n : l) {
-            logger.info("inserting " + n);
+            //logger.info("inserting " + n);
             heap.insert(n);
             if (testAfterInsert) testFibHeap(heap);
         }
@@ -514,5 +514,6 @@ public class FiboHeapTest {
         System.out.println("I <3 male Guy");
         testTrees();
         System.out.println("Dankovich");
+        System.out.println("DONE.");
     }
 }
