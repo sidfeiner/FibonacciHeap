@@ -6,13 +6,13 @@ public class Measurements {
 
     public static double geomSum(double q, int maxI) {
         double sum = 0;
-        for (int k = 1; k <= maxI; k++) {
+        for (int k = 1; k <= Math.max(1, maxI); k++) {
             sum += Math.pow(q, k);
         }
         return sum;
     }
 
-    public static void firstMeasurement() {
+    public static void firstMeasurement() throws Exception {
         System.out.println("######################## Measurement 1 ########################");
         FibonacciHeap.HeapNode node;
         int nodeIndex;
@@ -22,7 +22,7 @@ public class Measurements {
             FibonacciHeap.totalLinks = 0;
             System.out.println("-----------------");
             System.out.println("run for m=" + m);
-            FibonacciHeap.HeapNode[] nodes = new FibonacciHeap.HeapNode[m+1];
+            FibonacciHeap.HeapNode[] nodes = new FibonacciHeap.HeapNode[m + 1];
             FibonacciHeap heap = new FibonacciHeap();
             long start = System.nanoTime();
             for (int j = m; j >= 0; j--) {
@@ -35,10 +35,11 @@ public class Measurements {
                 heap.decreaseKey(nodes[nodeIndex], 150);
             }
             heap.decreaseKey(nodes[m - 1], 10);
-            System.out.println("time ms: " + ((System.nanoTime() - start))/1000);
+            System.out.println("time ms: " + ((System.nanoTime() - start)) / 1000000.0);
             System.out.println("totalLinks=" + FibonacciHeap.totalLinks());
             System.out.println("totalCuts=" + FibonacciHeap.totalCuts());
             System.out.println("potential=" + heap.potential());
+            Thread.sleep(1000);
         }
     }
 
@@ -60,14 +61,14 @@ public class Measurements {
             for (int j = 0; j < m / 2; j++) {
                 heap.deleteMin();
             }
-            System.out.println("time ms: " + ((System.nanoTime() - start)/1000));
+            System.out.println("time ms: " + ((System.nanoTime() - start) / 1000000.0));
             System.out.println("totalLinks=" + FibonacciHeap.totalLinks());
             System.out.println("totalCuts=" + FibonacciHeap.totalCuts());
             System.out.println("potential=" + heap.potential());
         }
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         firstMeasurement();
         secondMeasurement();
     }
