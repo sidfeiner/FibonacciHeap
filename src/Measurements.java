@@ -22,18 +22,19 @@ public class Measurements {
             FibonacciHeap.totalLinks = 0;
             System.out.println("-----------------");
             System.out.println("run for m=" + m);
-            FibonacciHeap.HeapNode[] nodes = new FibonacciHeap.HeapNode[m];
+            FibonacciHeap.HeapNode[] nodes = new FibonacciHeap.HeapNode[m+1];
             FibonacciHeap heap = new FibonacciHeap();
             long start = System.currentTimeMillis();
-            for (int j = m - 1; j >= 0; j--) {
+            for (int j = m; j >= 0; j--) {
                 node = heap.insert(j);
+                nodes[j] = node;
             }
             heap.deleteMin();
             for (int j = 0; j <= log2(m) - 2; j++) {
                 nodeIndex = (int) Math.floor(m * geomSum(0.5, j) + 2);
                 heap.decreaseKey(nodes[nodeIndex], 150);
             }
-            heap.decreaseKey(nodes[m - 2], 10);
+            heap.decreaseKey(nodes[m - 1], 10);
             System.out.println("time ms: " + (System.currentTimeMillis() - start));
             System.out.println("totalLinks=" + FibonacciHeap.totalLinks());
             System.out.println("totalCuts=" + FibonacciHeap.totalCuts());

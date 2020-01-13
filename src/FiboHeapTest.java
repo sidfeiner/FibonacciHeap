@@ -477,6 +477,7 @@ public class FiboHeapTest {
         } catch (DecreasedKeyException ex) {
             System.out.println("inserted: " + keys.toString());
             System.out.println("order of decreased keys: " + ex.getKeys().toString());
+            throw ex;
         } catch (Exception ex) {
             System.out.println("inserted: " + keys.toString());
             throw ex;
