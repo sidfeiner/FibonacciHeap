@@ -384,6 +384,7 @@ public class FibonacciHeap {
      * to reflect this change (for example, the cascading cuts procedure should be applied if needed).
      */
     public void decreaseKey(HeapNode x, int delta) {
+        logger.finest("decreasing key " + x.getKey() + " by " + delta);
         x.setKey(x.getKey() - delta);
         if (x.getKey() < minNode.getKey()) {
             minNode = x;
@@ -401,17 +402,11 @@ public class FibonacciHeap {
     private void cascadingCut(HeapNode node, HeapNode parent) {
         /*while node is not a root*/
         while (node.getParent() != null) {
+            logger.finest("cutting " + node.getKey() + " from parent " + parent.getKey());
             cut(node, parent);
             insertNodeAtStart(node);
             /*parent is not marked, cut and break form cuts*/
             if (!parent.isMarked && parent.getParent() != null) {
-                HeapNode tempNode = first;
-                for (int i = 0; i < numOfTrees; i++) {
-                    if (tempNode == parent) {
-                        System.out.println("got here");
-                    }
-                    tempNode = tempNode.getNext();
-                }
                 parent.mark();
                 numMarked++;
                 return;

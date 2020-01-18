@@ -1,4 +1,4 @@
-public class Measurements {
+public class FiboMeasurements {
 
     public static double log2(int n) {
         return Math.log(n) / Math.log(2);
@@ -6,7 +6,7 @@ public class Measurements {
 
     public static double geomSum(double q, int maxI) {
         double sum = 0;
-        for (int k = 1; k <= Math.max(1, maxI); k++) {
+        for (int k = 1; k <= maxI; k++) {
             sum += Math.pow(q, k);
         }
         return sum;
